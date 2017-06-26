@@ -98,6 +98,7 @@
     <Compile Include="CompilerTests\AssemblyInfoTests.cs" />
     <Compile Include="CompilerTests\AssemblyConfigHelperTests.cs" />
     <Compile Include="BuilderTests\BuilderTests.cs" />
+    <Compile Include="CompilerTests\FileHelperTests.cs" />
     <Compile Include="CompilerTests\SourceMapTests.cs" />
     <Compile Include="ContractTests\BridgeTypeTests.cs" />
     <Compile Include="Helpers\EmitterHelper.cs" />

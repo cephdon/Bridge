@@ -679,7 +679,7 @@ namespace Bridge.Translator
 
             if (isMinJs)
             {
-                searchName = fileHelper.GetNonMinifiedJSFileName(fileName);
+                searchName = fileHelper.EnsureNonMinifiedFileName(fileName);
             }
 
             output = target.FirstOrDefault(x => string.Compare(x.Name, searchName, StringComparison.InvariantCultureIgnoreCase) == 0);

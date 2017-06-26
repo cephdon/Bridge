@@ -938,7 +938,7 @@ namespace Bridge.Translator
                 this.Log.Trace("Switching off Bridge Console...");
 
                 var consoleResourceName = "bridge.console.js";
-                var consoleResourceMinifiedName = FileHelper.GetMinifiedJSFileName(consoleResourceName);
+                var consoleResourceMinifiedName = FileHelper.EnsureMinifiedFileName(consoleResourceName);
 
                 var consoleFormatted = resources.Where(x => x.Name == consoleResourceName && (x.Assembly == null || x.Assembly == Translator.Bridge_ASSEMBLY)).FirstOrDefault();
                 var consoleMinified = resources.Where(x => x.Name == consoleResourceMinifiedName && (x.Assembly == null || x.Assembly == Translator.Bridge_ASSEMBLY)).FirstOrDefault();

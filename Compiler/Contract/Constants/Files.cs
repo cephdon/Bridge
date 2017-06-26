@@ -4,6 +4,7 @@
     {
         public class Extensions
         {
+            public const string AnyMin = ".min";
             public const string JS = ".js";
             public const string MinJS = ".min.js";
             public const string DTS = ".d.ts";

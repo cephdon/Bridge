@@ -678,7 +678,7 @@ namespace Bridge.Translator
 
             if (minifiedBuffer != null)
             {
-                var minifiedName = FileHelper.GetMinifiedJSFileName(r.Name);
+                var minifiedName = FileHelper.EnsureMinifiedFileName(r.Name);
 
                 r.MinifiedVersion = new TranslatorOutputItem
                 {
@@ -756,7 +756,7 @@ namespace Bridge.Translator
                 return;
             }
 
-            var minifiedName = FileHelper.GetMinifiedJSFileName(output.Name);
+            var minifiedName = FileHelper.EnsureMinifiedFileName(output.Name);
 
             var minifiedContent = this.Minify(new Minifier(), formatted, minifierSettings);
 

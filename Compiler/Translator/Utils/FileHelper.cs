@@ -13,38 +13,68 @@ namespace Bridge.Translator
 {
     public class FileHelper
     {
-        public string GetMinifiedJSFileName(string fileName)
+        public string GetSymmetricFileName(string fileName)
         {
-            if (string.IsNullOrEmpty(fileName) || IsMinJS(fileName))
+            if (string.IsNullOrWhiteSpace(fileName))
             {
                 return fileName;
             }
 
-            var s = fileName.ReplaceLastInstanceOf(Files.Extensions.JS, Files.Extensions.MinJS);
+            var extention = Path.GetExtension(fileName);
+            var nameWithoutExtention = Path.GetFileNameWithoutExtension(fileName);
 
-            if (!IsMinJS(s))
+            var isMin = IsMin(fileName);
+
+            if (isMin)
             {
-                s = fileName.ReplaceLastInstanceOf(Files.Extensions.JS.ToUpper(), Files.Extensions.MinJS);
+                return StringUtils.ReplaceLastInstanceOf(fileName, Files.Extensions.AnyMin + extention, extention);
             }
 
-            return s;
+            if (string.IsNullOrEmpty(extention))
+            {
+                return fileName;
+            }
+
+            return StringUtils.ReplaceLastInstanceOf(fileName, extention, Files.Extensions.AnyMin + extention);
         }
 
-        public string GetNonMinifiedJSFileName(string fileName)
+        public string EnsureMinifiedFileName(string fileName)
         {
-            if (string.IsNullOrEmpty(fileName) || !IsMinJS(fileName))
+            if (string.IsNullOrEmpty(fileName) || IsMin(fileName))
             {
                 return fileName;
             }
 
-            var s = fileName.ReplaceLastInstanceOf(Files.Extensions.MinJS, Files.Extensions.JS);
+            return GetSymmetricFileName(fileName);
+        }
 
-            if (IsMinJS(s))
+        public string EnsureNonMinifiedFileName(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName) || !IsMin(fileName))
             {
-                s = fileName.ReplaceLastInstanceOf(Files.Extensions.MinJS.ToUpper(), Files.Extensions.JS);
+                return fileName;
             }
 
-            return s;
+            return GetSymmetricFileName(fileName);
+        }
+
+        public bool IsMin(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return false;
+            }
+
+            var nameWithoutExtention = Path.GetFileNameWithoutExtension(fileName);
+
+            if (!nameWithoutExtention.Contains("."))
+            {
+                // It does not have 'min' in fileName like nameWithoutExtention.min.extention
+                return false;
+            }
+
+            return string.Compare(nameWithoutExtention, Files.Extensions.AnyMin, true) == 0
+                || nameWithoutExtention.EndsWith(Files.Extensions.AnyMin, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public bool IsJS(string fileName)
@@ -59,12 +89,7 @@ namespace Bridge.Translator
 
         public bool IsMinJS(string fileName)
         {
-            if (fileName == null)
-            {
-                return false;
-            }
-
-            return fileName.EndsWith(Files.Extensions.MinJS, StringComparison.InvariantCultureIgnoreCase);
+            return IsJS(fileName) && IsMin(fileName);
         }
 
         public bool IsDTS(string fileName)
@@ -152,7 +177,7 @@ namespace Bridge.Translator
 
             if (changeExtention != null)
             {
-                fileName = fileName.ReplaceLastInstanceOf(changeExtention, string.Empty);
+                fileName = StringUtils.ReplaceLastInstanceOf(fileName, changeExtention, string.Empty);
             }
 
             if (fileName[fileName.Length - 1] == '.')
@@ -197,6 +222,54 @@ namespace Bridge.Translator
             }
 
             return file;
+        }
+
+        class StringUtils
+        {
+            public static string ReplaceLastInstanceOf(string text, string oldValue, string newValue)
+            {
+                if (text.IsEmpty())
+                {
+                    return text;
+                }
+
+                return string.Format("{0}{1}{2}", LeftOfRightmostOf(text, oldValue), newValue, RightOfRightmostOf(text, oldValue));
+            }
+
+            public static string LeftOfRightmostOf(string text, string value)
+            {
+                if (text.IsEmpty())
+                {
+                    return text;
+                }
+
+                int i = text.LastIndexOf(value, StringComparison.InvariantCultureIgnoreCase);
+
+                if (i == -1)
+                {
+                    return text;
+                }
+
+                return text.Substring(0, i);
+            }
+
+            public static string RightOfRightmostOf(string text, string value)
+            {
+                if (text.IsEmpty())
+                {
+                    return text;
+                }
+
+                int i = text.LastIndexOf(value, StringComparison.InvariantCultureIgnoreCase);
+
+                if (i == -1)
+                {
+                    return text;
+                }
+
+                return text.Substring(i + value.Length);
+            }
+
         }
     }
 }
