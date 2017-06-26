@@ -276,6 +276,34 @@ namespace Bridge.Translator
                                 || string.Compare(x.Assembly, reference.Name.Name, StringComparison.InvariantCultureIgnoreCase) == 0))
                         .FirstOrDefault();
 
+                    if (resourceExtractItems == null)
+                    {
+                        // Try to find its simmetric
+                        var symmetricName = FileHelper.GetSymmetricFileName(resName);
+
+                        if (!FileHelper.IsMin(symmetricName)
+                            && !string.Equals(resName, symmetricName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var symmetricResourceExtractItems = resourceOption.ExtractItems
+                                .Where(
+                                    x => string.Compare(x.Name, symmetricName, StringComparison.InvariantCultureIgnoreCase) == 0
+                                    && (x.Assembly == null
+                                        || string.Compare(x.Assembly, reference.Name.Name, StringComparison.InvariantCultureIgnoreCase) == 0))
+                                .FirstOrDefault();
+
+                            if (symmetricResourceExtractItems != null && symmetricResourceExtractItems.Extract != true)
+                            {
+                                this.Log.Info("Skipping resource "
+                                    + resName
+                                    + " as it does not have setting in resources but its symmetric "
+                                    + symmetricName
+                                    +"has resource.extract != true");
+
+                                continue;
+                            }
+                        }
+                    }
+
                     if (resourceExtractItems != null)
                     {
                         this.Log.Trace("Found resource option for resource name " + resourceExtractItems.Name + " and reference " + resourceExtractItems.Assembly);
