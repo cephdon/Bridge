@@ -47,7 +47,8 @@ namespace Bridge.Translator.Tests
             Assert.Null(config.LocalesOutput, "LocalesOutput");
             Assert.Null(config.LocalesFileName, "LocalesFileName");
             Assert.False(config.CombineLocales, "CombineLocales");
-            Assert.False(config.CombineScripts, "CombineScripts");
+            Assert.False(config.CombineScripts.Enabled, "CombineScripts.Enabled");
+            Assert.Null(config.CombineScripts.NoReferenced, "CombineScripts.NoReferenced");
             Assert.False(config.UseTypedArrays, "UseTypedArrays");
             Assert.False(config.IgnoreCast, "IgnoreCast");
             Assert.Null(config.OverflowMode, "OverflowMode");

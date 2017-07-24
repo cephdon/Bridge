@@ -23,6 +23,7 @@ namespace Bridge.Translator
             this.Html = new HtmlConfig();
             this.Console = new ConsoleConfig();
             this.Report = new ReportConfig();
+            this.CombineScripts = new CombineConfig();
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace Bridge.Translator
         {
             get
             {
-                if (this.CombineScripts || !string.IsNullOrEmpty(this.FileName))
+                if (this.CombineScripts.Enabled || !string.IsNullOrEmpty(this.FileName))
                 {
                     return OutputBy.Project;
                 }
@@ -232,7 +233,8 @@ namespace Bridge.Translator
             get; set;
         }
 
-        public bool CombineScripts
+        [Newtonsoft.Json.JsonConverter(typeof(CombineConfigConverter))]
+        public CombineConfig CombineScripts
         {
             get; set;
         }

@@ -132,7 +132,7 @@ namespace Bridge.Contract
             get; set;
         }
 
-        bool CombineScripts
+        CombineConfig CombineScripts
         {
             get; set;
         }

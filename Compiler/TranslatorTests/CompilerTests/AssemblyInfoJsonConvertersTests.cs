@@ -218,6 +218,79 @@ namespace Bridge.Translator.Tests
                 "7");
         }
 
+        [Test]
+        public void AssemblyInfoJsonConverters_CombineConfigConverterSerialization()
+        {
+            AssertJsonSerialization(
+                new CombineInfo(),
+                "{\"Combine\":null}",
+                "1");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() },
+                "{\"Combine\":false}",
+                "2");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true } },
+                "{\"Combine\":true}",
+                "3");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false } },
+                "{\"Combine\":false}",
+                "4");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true } },
+                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":true}}",
+                "5");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = true } },
+                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":true}}",
+                "6");
+        }
+
+        [Test]
+        public void AssemblyInfoJsonConverters_CombineConfigConverterDeserialization()
+        {
+            AssertJsonDeserialization(
+                "{\"Combine\":null}",
+                new CombineInfo(),
+                "1");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":false}",
+                new CombineInfo { Combine = new CombineConfig { Enabled = false } },
+                "2");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":true}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true } },
+                "3");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":false}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = false } },
+                "4");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":true}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = true } },
+                "5");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":false}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = false } },
+                "6");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":true}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true } },
+                "7");
+        }
+
         private static void AssertJsonSerialization(object value, string expected, string message = null)
         {
             var actual = JsonConvert.SerializeObject(value, Formatting.None);
@@ -360,6 +433,51 @@ namespace Bridge.Translator.Tests
                 return c1.Enabled == c2.Enabled
                     && c1.Path == c2.Path
                     && c1.FileName == c2.FileName;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+        }
+
+        class CombineInfo
+        {
+            [JsonConverter(typeof(CombineConfigConverter))]
+            public CombineConfig Combine
+            {
+                get; set;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                {
+                    return false;
+                }
+
+                var ci = obj as CombineInfo;
+
+                if (ci == null)
+                {
+                    return false;
+                }
+
+                var c1 = this.Combine;
+                var c2 = ci.Combine;
+
+                if (c1 == null && c2 == null)
+                {
+                    return true;
+                }
+
+                if (c1 == null || c2 == null)
+                {
+                    return false;
+                }
+
+                return c1.Enabled == c2.Enabled
+                    && c1.NoReferenced == c2.NoReferenced;
             }
 
             public override int GetHashCode()

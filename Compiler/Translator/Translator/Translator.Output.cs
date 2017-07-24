@@ -486,7 +486,7 @@ namespace Bridge.Translator
         {
             this.Log.Trace("Combining locales...");
 
-            if (!this.AssemblyInfo.CombineLocales && !this.AssemblyInfo.CombineScripts)
+            if (!this.AssemblyInfo.CombineLocales && !this.AssemblyInfo.CombineScripts.Enabled)
             {
                 this.Log.Trace("Skipping combining locales as CombineLocales and CombineScripts config oiptions are both switched off.");
                 return;
@@ -512,7 +512,7 @@ namespace Bridge.Translator
         {
             this.Log.Trace("Combining project outputs...");
 
-            if (!this.AssemblyInfo.CombineScripts)
+            if (!this.AssemblyInfo.CombineScripts.Enabled)
             {
                 this.Log.Trace("Skipping project outputs as CombineScripts config option switched off.");
                 return;
@@ -521,18 +521,23 @@ namespace Bridge.Translator
             var needNewLine = false;
             StringBuilder buffer = null;
             int bufferLength = 0;
+            TranslatorOutputItem combinedOutput = null;
 
-            var combinedOutput = Combine(null, this.Outputs.References, fileName, "project references", TranslatorOutputKind.ProjectOutput);
-
-            if (combinedOutput != null)
+            // Combine output from referenced assemblies (resources) if noRefs == false
+            if (!this.AssemblyInfo.CombineScripts.NoReferenced)
             {
-                buffer = combinedOutput.Content.Builder;
+                combinedOutput = Combine(combinedOutput, this.Outputs.References, fileName, "project references", TranslatorOutputKind.ProjectOutput);
 
-                bufferLength = buffer.Length;
-
-                if (bufferLength > 0)
+                if (combinedOutput != null)
                 {
-                    needNewLine = true;
+                    buffer = combinedOutput.Content.Builder;
+
+                    bufferLength = buffer.Length;
+
+                    if (bufferLength > 0)
+                    {
+                        needNewLine = true;
+                    }
                 }
             }
 
