@@ -665,7 +665,7 @@ namespace Bridge.Translator
             return true;
         }
 
-        internal static bool AddOutputItem(List<TranslatorOutputItem> target, string fileName, TranslatorOutputItemContent content, TranslatorOutputKind outputKind, string location = null)
+        internal static bool AddOutputItem(List<TranslatorOutputItem> target, string fileName, TranslatorOutputItemContent content, TranslatorOutputKind outputKind, string location = null, bool isCore = false)
         {
             var fileHelper = new FileHelper();
 
@@ -699,13 +699,15 @@ namespace Bridge.Translator
                         OutputKind = outputKind | TranslatorOutputKind.Minified,
                         Location = location,
                         Content = content,
-                        IsMinified = true
+                        IsMinified = true,
+                        IsCore = isCore
                     };
                 }
                 else
                 {
                     isAdded = output.IsEmpty;
                     output.IsEmpty = false;
+                    output.IsCore = isCore;
                 }
 
                 return isAdded;
@@ -717,7 +719,8 @@ namespace Bridge.Translator
                 OutputType = outputType,
                 OutputKind = outputKind,
                 Location = location,
-                Content = new TranslatorOutputItemContent((string)null)
+                Content = new TranslatorOutputItemContent((string)null),
+                IsCore = isCore
             };
 
             if (isMinJs)
@@ -731,7 +734,8 @@ namespace Bridge.Translator
                     OutputKind = outputKind | TranslatorOutputKind.Minified,
                     Location = location,
                     Content = content,
-                    IsMinified = true
+                    IsMinified = true,
+                    IsCore = isCore
                 };
             }
             else

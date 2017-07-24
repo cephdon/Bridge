@@ -141,6 +141,11 @@ namespace Bridge.Contract
             get; set;
         }
 
+        public bool IsCore
+        {
+            get; set;
+        }
+
         private Uri fullPath;
         public Uri FullPath
         {

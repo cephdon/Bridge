@@ -216,7 +216,7 @@ namespace Bridge.Translator
 
             var content = this.ReadEmbeddedResource(resource);
 
-            Emitter.AddOutputItem(this.Outputs.Locales, fileName, new StringBuilder(content), TranslatorOutputKind.Locale, outputPath);
+            Emitter.AddOutputItem(this.Outputs.Locales, fileName, new StringBuilder(content), TranslatorOutputKind.Locale, outputPath, isCore: true);
         }
 
         protected virtual void AddLocaleOutputs(IEnumerable<EmbeddedResource> resources, string outputPath)
@@ -236,6 +236,8 @@ namespace Bridge.Translator
                 throw new InvalidOperationException("Could not read resource " + resourceName + " in " + assembly.FullName);
             }
 
+            var isCore = assembly.Name.Name == Bridge.Translator.Translator.Bridge_ASSEMBLY;
+
             using (var resourcesStream = ((EmbeddedResource)res).GetResourceStream())
             {
                 if (FileHelper.IsJS(fileName) || preHandler != null)
@@ -243,13 +245,13 @@ namespace Bridge.Translator
                     using (var reader = new StreamReader(resourcesStream))
                     {
                         var content = reader.ReadToEnd();
-                        Emitter.AddOutputItem(this.Outputs.References, fileName, content, TranslatorOutputKind.Reference, outputPath);
+                        Emitter.AddOutputItem(this.Outputs.References, fileName, content, TranslatorOutputKind.Reference, outputPath, isCore: isCore);
                     }
                 }
                 else
                 {
                     var binary = ReadStream(resourcesStream);
-                    Emitter.AddOutputItem(this.Outputs.References, fileName, binary, TranslatorOutputKind.Reference, outputPath);
+                    Emitter.AddOutputItem(this.Outputs.References, fileName, binary, TranslatorOutputKind.Reference, outputPath, isCore: isCore);
                 }
             }
         }
@@ -523,10 +525,27 @@ namespace Bridge.Translator
             int bufferLength = 0;
             TranslatorOutputItem combinedOutput = null;
 
-            // Combine output from referenced assemblies (resources) if noRefs == false
-            if (!this.AssemblyInfo.CombineScripts.NoReferenced)
+            // Combine output from referenced assemblies (resources)
+            // if noReferenced == false OR noCore == false
+            if (!this.AssemblyInfo.CombineScripts.NoReferenced
+                || !this.AssemblyInfo.CombineScripts.NoCore)
             {
-                combinedOutput = Combine(combinedOutput, this.Outputs.References, fileName, "project references", TranslatorOutputKind.ProjectOutput);
+                bool? onlyCore = null;
+
+                // null - both
+                // true - only core
+                // false - only referenced
+
+                if (!this.AssemblyInfo.CombineScripts.NoCore && this.AssemblyInfo.CombineScripts.NoReferenced)
+                {
+                    onlyCore = true;
+                }
+                else if (this.AssemblyInfo.CombineScripts.NoCore && !this.AssemblyInfo.CombineScripts.NoReferenced)
+                {
+                    onlyCore = false;
+                }
+
+                combinedOutput = Combine(combinedOutput, this.Outputs.References, fileName, "project references", TranslatorOutputKind.ProjectOutput, onlyCore: onlyCore);
 
                 if (combinedOutput != null)
                 {
@@ -579,7 +598,7 @@ namespace Bridge.Translator
             this.Log.Trace("Combining project outputs done");
         }
 
-        private TranslatorOutputItem Combine(TranslatorOutputItem target, List<TranslatorOutputItem> outputs, string fileName, string message, TranslatorOutputKind outputKind, TranslatorOutputType[] filter = null)
+        private TranslatorOutputItem Combine(TranslatorOutputItem target, List<TranslatorOutputItem> outputs, string fileName, string message, TranslatorOutputKind outputKind, TranslatorOutputType[] filter = null, bool? onlyCore = false)
         {
             this.Log.Trace("There are " + outputs.Count + " " + message);
 
@@ -627,6 +646,21 @@ namespace Bridge.Translator
                 if (filter != null && !filter.Contains(output.OutputType))
                 {
                     continue;
+                }
+
+                if (onlyCore.HasValue)
+                {
+                    if (onlyCore.Value && !output.IsCore)
+                    {
+                        this.Log.Trace("Skipping " + output.Name + " as it is NOT core but output required is onlyCore");
+                        continue;
+                    }
+
+                    if (!onlyCore.Value && output.IsCore)
+                    {
+                        this.Log.Trace("Skipping " + output.Name + " as it is core but output required is except core");
+                        continue;
+                    }
                 }
 
                 string formattedContent = null;

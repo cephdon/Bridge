@@ -12,6 +12,11 @@ namespace Bridge.Contract
             get; set;
         }
 
+        public bool NoCore
+        {
+            get; set;
+        }
+
         public bool NoReferenced
         {
             get; set;
@@ -28,7 +33,7 @@ namespace Bridge.Contract
             {
                 return;
             }
-            else if (!config.NoReferenced)
+            else if (!config.NoReferenced && !config.NoCore)
             {
                 serializer.Serialize(writer, config.Enabled);
             }

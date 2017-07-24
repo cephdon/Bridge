@@ -102,6 +102,7 @@ namespace Bridge.Translator
             var fileName = GetDefaultFileName(bridgeOptions);
 
             translator.Minify();
+
             translator.Combine(fileName);
             translator.Save(outputPath, fileName);
 

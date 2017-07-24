@@ -243,13 +243,28 @@ namespace Bridge.Translator.Tests
 
             AssertJsonSerialization(
                 new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true } },
-                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":true}}",
+                "{\"Combine\":{\"Enabled\":true,\"NoCore\":false,\"NoReferenced\":true}}",
                 "5");
 
             AssertJsonSerialization(
                 new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = true } },
-                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":true}}",
+                "{\"Combine\":{\"Enabled\":false,\"NoCore\":false,\"NoReferenced\":true}}",
                 "6");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true, NoCore = false } },
+                "{\"Combine\":{\"Enabled\":true,\"NoCore\":false,\"NoReferenced\":true}}",
+                "7");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true, NoCore = true } },
+                "{\"Combine\":{\"Enabled\":true,\"NoCore\":true,\"NoReferenced\":true}}",
+                "8");
+
+            AssertJsonSerialization(
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = false, NoCore = true } },
+                "{\"Combine\":{\"Enabled\":false,\"NoCore\":true,\"NoReferenced\":false}}",
+                "9");
         }
 
         [Test]
@@ -289,6 +304,26 @@ namespace Bridge.Translator.Tests
                 "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":true}}",
                 new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true } },
                 "7");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":false,\"NoCore\":false}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = false } },
+                "8");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":false,\"NoReferenced\":true,\"NoCore\":true}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = false, NoReferenced = true, NoCore = true } },
+                "9");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":false,\"NoCore\":true}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = false, NoCore = true } },
+                "10");
+
+            AssertJsonDeserialization(
+                "{\"Combine\":{\"Enabled\":true,\"NoReferenced\":true,\"NoCore\":false}}",
+                new CombineInfo { Combine = new CombineConfig() { Enabled = true, NoReferenced = true, NoCore = false } },
+                "11");
         }
 
         private static void AssertJsonSerialization(object value, string expected, string message = null)
@@ -477,6 +512,7 @@ namespace Bridge.Translator.Tests
                 }
 
                 return c1.Enabled == c2.Enabled
+                    && c1.NoCore == c2.NoCore
                     && c1.NoReferenced == c2.NoReferenced;
             }
 
